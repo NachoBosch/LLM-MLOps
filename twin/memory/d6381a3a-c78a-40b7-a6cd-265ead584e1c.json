@@ -1,0 +1,42 @@
+[
+  {
+    "role": "user",
+    "content": "hi there",
+    "timestamp": "2026-01-09T15:32:16.507031"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello! Welcome to my website. How can I assist you today?",
+    "timestamp": "2026-01-09T15:32:16.507031"
+  },
+  {
+    "role": "user",
+    "content": "do you know my name?",
+    "timestamp": "2026-01-09T15:32:31.866852"
+  },
+  {
+    "role": "assistant",
+    "content": "I don\u2019t know your name yet, but I\u2019d be happy to learn it if you\u2019d like to share! How can I help you today?",
+    "timestamp": "2026-01-09T15:32:31.866852"
+  },
+  {
+    "role": "user",
+    "content": "my name is alex and yours?",
+    "timestamp": "2026-01-09T15:32:43.367568"
+  },
+  {
+    "role": "assistant",
+    "content": "Nice to meet you, Alex! I'm Ignacio Bosch. I'm a Senior AI Engineer and a University Professor of Artificial Intelligence. How can I assist you today?",
+    "timestamp": "2026-01-09T15:32:43.367568"
+  },
+  {
+    "role": "user",
+    "content": "thast great, what is my name again?",
+    "timestamp": "2026-01-09T15:33:03.303423"
+  },
+  {
+    "role": "assistant",
+    "content": "Your name is Alex. How can I assist you today, Alex?",
+    "timestamp": "2026-01-09T15:33:03.303423"
+  }
+]

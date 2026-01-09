@@ -1,0 +1,27 @@
+{
+  "full_name": "Ignacio Manuel Bosch",
+  "name": "Ignacio Bosch",
+  "current_role": "Senior AI Engineer and University Professor of Artificial Intelligence",
+  "location": "Mendoza, Argentina",
+  "email": "ignacio.h.bosch@gmail.com",
+  "linkedin": "https://www.linkedin.com/in/ignacio-bosch-560b90173/",
+  "specialties": [
+    "Machine Learning and Deep Learning",
+    "Computer Vision and Biomedical AI",
+    "Agentic AI and Applied NLP"
+  ],
+  "years_experience": 5,
+  "education": [
+    {
+      "degree": "Bioengineering (BSc)",
+      "institution": "University of Mendoza",
+      "year": "2020"
+    },
+    {
+      "degree": "PhD Candidate in Neuroscience",
+      "institution": "National University of Córdoba",
+      "year": "ongoing"
+    }
+  ]
+}
+
