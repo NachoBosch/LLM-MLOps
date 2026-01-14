@@ -186,8 +186,18 @@ finale/.dockerignore
 .terraform.lock.hcl
 terraform.tfstate.d/
 *.tfvars
-!terraform.tfvars
-!prod.tfvars
+*.tfvars.backup
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+crash.log
+crash.*.log
+*.tfplan
+.terraform.tfstate.lock.info
 
 # Lambda packages
 lambda-deployment.zip
