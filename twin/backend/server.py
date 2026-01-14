@@ -10,6 +10,7 @@ from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 from context import prompt
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -26,19 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Bedrock client
-bedrock_client = boto3.client(
-    service_name="bedrock-runtime", 
-    region_name=os.getenv("DEFAULT_AWS_REGION", "us-east-1")
-)
+# Initialize OpenAI client
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Bedrock model selection
-# Available models:
-# - amazon.nova-micro-v1:0  (fastest, cheapest)
-# - amazon.nova-lite-v1:0   (balanced - default)
-# - amazon.nova-pro-v1:0    (most capable, higher cost)
-# Remember the Heads up: you might need to add us. or eu. prefix to the below model id
-BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "huggingface-vlm-gemma-3-4b-instruct")
+# OpenAI model selection
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 # Memory storage configuration
 USE_S3 = os.getenv("USE_S3", "false").lower() == "true"
@@ -108,67 +101,55 @@ def save_conversation(session_id: str, messages: List[Dict]):
             json.dump(messages, f, indent=2)
 
 
-def call_bedrock(conversation: List[Dict], user_message: str) -> str:
-    """Call AWS Bedrock with conversation history"""
+def call_openai(conversation: List[Dict], user_message: str) -> str:
+    """Call OpenAI GPT-4o-mini with conversation history"""
     
-    # Build messages in Bedrock format
+    # Build messages in OpenAI format
     messages = []
     
-    # Add system prompt as first user message (Bedrock convention)
+    # Add system prompt
     messages.append({
-        "role": "user", 
-        "content": [{"text": f"System: {prompt()}"}]
+        "role": "system",
+        "content": prompt()
     })
     
-    # Add conversation history (limit to last 10 exchanges to manage context)
-    for msg in conversation[-20:]:  # Last 10 back-and-forth exchanges
+    # Add conversation history (limit to last 20 messages to manage context)
+    for msg in conversation[-20:]:
         messages.append({
             "role": msg["role"],
-            "content": [{"text": msg["content"]}]
+            "content": msg["content"]
         })
     
     # Add current user message
     messages.append({
         "role": "user",
-        "content": [{"text": user_message}]
+        "content": user_message
     })
     
     try:
-        # Call Bedrock using the converse API
-        response = bedrock_client.converse(
-            modelId=BEDROCK_MODEL_ID,
+        # Call OpenAI API
+        response = openai_client.chat.completions.create(
+            model=OPENAI_MODEL,
             messages=messages,
-            inferenceConfig={
-                "maxTokens": 2000,
-                "temperature": 0.7,
-                "topP": 0.9
-            }
+            max_tokens=2000,
+            temperature=0.7
         )
         
         # Extract the response text
-        return response["output"]["message"]["content"][0]["text"]
+        return response.choices[0].message.content
         
-    except ClientError as e:
-        error_code = e.response['Error']['Code']
-        if error_code == 'ValidationException':
-            # Handle message format issues
-            print(f"Bedrock validation error: {e}")
-            raise HTTPException(status_code=400, detail="Invalid message format for Bedrock")
-        elif error_code == 'AccessDeniedException':
-            print(f"Bedrock access denied: {e}")
-            raise HTTPException(status_code=403, detail="Access denied to Bedrock model")
-        else:
-            print(f"Bedrock error: {e}")
-            raise HTTPException(status_code=500, detail=f"Bedrock error: {str(e)}")
+    except Exception as e:
+        print(f"OpenAI error: {e}")
+        raise HTTPException(status_code=500, detail=f"OpenAI error: {str(e)}")
 
 
 @app.get("/")
 async def root():
     return {
-        "message": "AI Digital Twin API (Powered by AWS Bedrock)",
+        "message": "AI Digital Twin API (Powered by OpenAI)",
         "memory_enabled": True,
         "storage": "S3" if USE_S3 else "local",
-        "ai_model": BEDROCK_MODEL_ID
+        "ai_model": OPENAI_MODEL
     }
 
 
@@ -177,7 +158,7 @@ async def health_check():
     return {
         "status": "healthy", 
         "use_s3": USE_S3,
-        "bedrock_model": BEDROCK_MODEL_ID
+        "openai_model": OPENAI_MODEL
     }
 
 
@@ -190,8 +171,8 @@ async def chat(request: ChatRequest):
         # Load conversation history
         conversation = load_conversation(session_id)
 
-        # Call Bedrock for response
-        assistant_response = call_bedrock(conversation, request.message)
+        # Call OpenAI for response
+        assistant_response = call_openai(conversation, request.message)
 
         # Update conversation history
         conversation.append(
